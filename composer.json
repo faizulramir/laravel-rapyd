@@ -1,0 +1,21 @@
+{
+    "name": "fzlxtech/laravel-rapyd",
+    "description": "Package for integration between Laravel and Rapyd",
+    "type": "composer-plugin",
+    "require": {
+        "php": ">=7.4",
+        "illuminate/support": ">=5.4",
+        "guzzlehttp/guzzle": "7.9.x-dev"
+    },
+    "authors": [
+        {
+            "name": "Fzlxtech"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "Fzlxtech\\LaravelRapyd\\": "src/"
+        }
+    }
+}
