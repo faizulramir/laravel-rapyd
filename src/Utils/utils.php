@@ -2,11 +2,17 @@
 
 namespace Fzlxtech\LaravelRapyd\Utils;
 
+use Config;
 use DateTime;
-use DateTimeZone;
 use Illuminate\Support\Facades\Http;
 
 class Utils {
+    private $rapyd_env;
+
+    public function __construct()
+    {
+        $this->rapyd_env = Config::get('rapyd.rapyd_env');
+    }
     function generate_string($length=12) {
         $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         return substr(str_shuffle($permitted_chars), 0, $length);
@@ -15,14 +21,13 @@ class Utils {
     function makeRequest($request, $path)  {
         $method = $request->isMethod('post') ? 'post' : 'get';
         $body = $method == 'post' ? $request->all() : null;
-        $base_url = 'https://sandboxapi.rapyd.net';
-        $secret_key = 'rsk_8f8f481bc8ecfc450af3958ab390227fec9f61ae4607768cb33d0c37d0c6997e44f0f74afc866911';     // Never transmit the secret key by itself.
-        $access_key = 'rak_657422F4421C8DEE5BCF';     // The access key received from Rapyd.
-        
+        $base_url = 'https://'. ($this->rapyd_env == 'prod' ? 'sandboxapi.' : '') .'rapyd.net';
+        $secret_key = Config::get('rapyd.rapyd_secret_key');     // Never transmit the secret key by itself.
+        $access_key = Config::get('rapyd.rapyd_access_key');    // The access key received from Rapyd.
         $idempotency = $this->generate_string();      // Unique for each request.
         $http_method = $method;                // Lower case.
         $salt = $this->generate_string();             // Randomly generated for each request.
-        $date = new DateTime("now", new DateTimeZone('Asia/Kuala_Lumpur'));
+        $date = new DateTime();
         $timestamp = $date->getTimestamp();    // Current Unix time.
         
         $body_string = !is_null($body) ? json_encode($body,JSON_UNESCAPED_SLASHES) : '';
