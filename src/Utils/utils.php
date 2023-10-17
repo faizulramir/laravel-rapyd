@@ -20,7 +20,15 @@ class Utils {
 
     function makeRequest($request, $path)  {
         $method = $request->isMethod('post') ? 'post' : 'get';
-        $body = $method == 'post' ? $request->all() : null;
+
+        if ($method == 'post') {
+            $body = $request->all();
+            $body['complete_payment_url'] = Config::get('rapyd.rapyd_complete_url');
+            $body['error_payment_url'] = Config::get('rapyd.rapyd_error_url');
+        } else {
+            $body = null;
+        }
+
         $base_url = 'https://'. ($this->rapyd_env == 'prod' ? 'sandboxapi.' : '') .'rapyd.net';
         $secret_key = Config::get('rapyd.rapyd_secret_key');     // Never transmit the secret key by itself.
         $access_key = Config::get('rapyd.rapyd_access_key');    // The access key received from Rapyd.
@@ -46,7 +54,7 @@ class Utils {
             "signature" => $signature,
             "idempotency" => $idempotency
         ])->post($base_url.$path, $body)->json();
-        
+
         if ($response['status']['status'] == "ERROR") {
             return null; 
         }
